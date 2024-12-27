@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Social Media</h1>
+    </header>
+
+    <div class="container">
+        <form id="loginForm">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="error" style="color: red; display: none;">Invalid username or password!</p>
+    </div>
+
+    <script>
+        // Hardcoded credentials (you can replace this with a database or API validation)
+        const validUsername = "user";
+        const validPassword = "password";
+
+        const loginForm = document.getElementById('loginForm');
+        const error = document.getElementById('error');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Validate credentials
+            if (username  && password) {
+                // Redirect to the front page
+                window.location.href = "front_page.html";
+            } else {
+                // Show error message
+                error.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
