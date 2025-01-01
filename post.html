@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media - Create Post</title>
+    <link rel="stylesheet" href="post.css">
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Social Media</h1>
+        <button id="homeButton" class="home-button">Home</button>
+    </header>
+
+    <div class="container">
+        <form class="post-form" id="postForm">
+            <input type="text" name="title" id="title" placeholder="Enter a title" required>
+            <textarea name="content" id="content" rows="4" placeholder="What's on your mind?" required></textarea>
+            <input type="date" name="date" id="date" required>
+            <select name="subject" id="subject" required>
+                <option value="" disabled selected>Select a subject</option>
+                <option value="politicsNews">Politics News</option>
+                <option value="worldnews">World News</option>
+                <option value="News">General News</option>
+                <option value="politics">Politics</option>
+                <option value="Government_News">Government News</option>
+                <option value="left-news">Left News</option>
+                <option value="Middle-east">Middle East</option>
+                <option value="US_News">US News</option>
+            </select>
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfBTuWDh5nIQw6Ut7BVQVqgvqFFy3iHig",
+            authDomain: "fakenewsdatabase.firebaseapp.com",
+            databaseURL: "https://fakenewsdatabase-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fakenewsdatabase",
+            storageBucket: "fakenewsdatabase.appspot.com",
+            messagingSenderId: "304254003624",
+            appId: "1:304254003624:web:3f1fb4b99e388b8de2d59d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Home button redirection
+        const homeButton = document.getElementById('homeButton');
+        homeButton.addEventListener('click', () => {
+            window.location.href = 'frontend.html';
+        });
+
+        // Form submission event
+        const postForm = document.getElementById('postForm');
+        postForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const date = document.getElementById('date').value;
+            const subject = document.getElementById('subject').value;
+
+            // Create a reference to the 'root/posts' node in the database
+            const postsRef = ref(database, 'root/posts');
+
+            // Push the new post to Firebase
+            push(postsRef, {
+                title,
+                content,
+                date,
+                subject
+            })
+            .then(() => {
+                // Reset the input fields
+                postForm.reset();
+
+                // Optional: Add a confirmation message
+                alert("Post created successfully!");
+            })
+            .catch((error) => {
+                console.error("Error saving post to Firebase:", error);
+                alert("Failed to create the post. Please try again.");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media - View Posts</title>
+    <link rel="stylesheet" href="front.css">
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Social Media</h1>
+        <div class="header-buttons">
+            <button id="postButton" class="post-button">Create Post</button>
+            <button id="logoutButton" class="logout-button">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="posts" id="posts">
+            <!-- Posts will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfBTuWDh5nIQw6Ut7BVQVqgvqFFy3iHig",
+            authDomain: "fakenewsdatabase.firebaseapp.com",
+            databaseURL: "https://fakenewsdatabase-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "fakenewsdatabase",
+            storageBucket: "fakenewsdatabase.appspot.com",
+            messagingSenderId: "304254003624",
+            appId: "1:304254003624:web:3f1fb4b99e388b8de2d59d"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Redirect to post.html when the "Create Post" button is clicked
+        const postButton = document.getElementById('postButton');
+        postButton.addEventListener('click', () => {
+            window.location.href = 'post.html';
+        });
+
+        // Redirect to login.html when the "Logout" button is clicked
+        const logoutButton = document.getElementById('logoutButton');
+        logoutButton.addEventListener('click', () => {
+            window.location.href = 'log_in.html';
+        });
+
+        const postsContainer = document.getElementById('posts');
+
+        // Fetch posts from Firebase
+        const postsRef = ref(database, 'root'); // Point to the 'root' of your database
+        onValue(postsRef, (snapshot) => {
+            postsContainer.innerHTML = ''; // Clear existing posts
+            const postsData = snapshot.val();
+
+            if (postsData) {
+                // Consolidate posts into a single array
+                let allPosts = [];
+
+                // Loop through keys to extract posts
+                for (const key in postsData) {
+                    if (key === "posts") {
+                        // Extract posts from "posts" key
+                        const nestedPosts = Object.entries(postsData[key]);
+                        allPosts = allPosts.concat(nestedPosts.map(([id, post]) => ({ id, ...post })));
+                    } else if (!isNaN(key)) {
+                        // Extract individual post objects
+                        allPosts.push({ id: key, ...postsData[key] });
+                    }
+                }
+
+                // Sort posts by date (newest first)
+                allPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Limit to first 5 posts
+                const limitedPosts = allPosts.slice(0, 5);
+
+                // Render posts
+                limitedPosts.forEach((post) => {
+                    const postElement = document.createElement('div');
+                    postElement.classList.add('post');
+
+                    // Create title element
+                    const postTitle = document.createElement('h3');
+                    postTitle.textContent = post.title;
+
+                    // Create content element
+                    const postContent = document.createElement('p');
+                    postContent.textContent = post.text || post.content; // Adjust for different keys
+
+                    // Create date and subject container
+                    const postMeta = document.createElement('div');
+                    postMeta.classList.add('post-meta');
+
+                    // Create date element
+                    const postDate = document.createElement('p');
+                    postDate.classList.add('date');
+                    postDate.textContent = `Date: ${post.date}`;
+
+                    // Create subject element
+                    const postSubject = document.createElement('p');
+                    postSubject.classList.add('subject');
+                    postSubject.textContent = `Subject: ${post.subject}`;
+
+                    // Append date and subject to post meta container
+                    postMeta.appendChild(postDate);
+                    postMeta.appendChild(postSubject);
+
+                    // Create Delete button
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => {
+                        if (confirm('Are you sure you want to delete this post?')) {
+                            const postRef = ref(database, `root/posts/${post.id}`);
+                            remove(postRef)
+                                .then(() => {
+                                    alert('Post deleted successfully.');
+                                })
+                                .catch((error) => {
+                                    console.error('Error deleting post:', error);
+                                });
+                        }
+                    });
+
+                    // Append elements to the post
+                    postElement.appendChild(postTitle);
+                    postElement.appendChild(postContent);
+                    postElement.appendChild(postMeta);
+                    postElement.appendChild(deleteButton);
+
+                    // Add post to the posts container
+                    postsContainer.appendChild(postElement);
+                });
+            } else {
+                postsContainer.textContent = 'No posts available.';
+            }
+        });
+    </script>
+</body>
+</html>
